@@ -31,6 +31,7 @@ public class KeyPressCommand implements SocketCommand<KeyPressConfig> {
     @Override
     public void onLoad(KeyPressConfig keyPressConfig) {
         this.config = keyPressConfig;
+        robot.setAutoDelay((int) config.getInterval());
     }
 
     @Override
@@ -39,7 +40,6 @@ public class KeyPressCommand implements SocketCommand<KeyPressConfig> {
         List<Integer> list = new ArrayList<>();
         try {
             for (int i = 0, size = (int) Math.min(sp.length, config.getMax()); i < size; i++) {
-                Thread.sleep(config.getInterval());
                 int code = parse(sp[i]);
                 if (code >= 0) {
                     robot.keyPress(code);
