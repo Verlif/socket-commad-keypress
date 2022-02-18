@@ -156,6 +156,8 @@ public class KeyPressCommand implements SocketCommand<KeyPressConfig> {
             // modifiers
             case "SHIFT":
                 return KeyEvent.VK_SHIFT;
+            case "CTL":
+            case "CTRL":
             case "CONTROL":
                 return KeyEvent.VK_CONTROL;
             case "ALT":
