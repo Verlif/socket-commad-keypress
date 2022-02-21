@@ -211,16 +211,6 @@ public class KeyPressCommand implements SocketCommand<KeyPressConfig> {
         return true;
     }
 
-    public static void main(String[] args) throws AWTException {
-        Robot robot = new Robot();
-        robot.setAutoDelay(20);
-
-        robot.keyPress(KeyEvent.VK_SHIFT);
-        robot.keyPress('A');
-        robot.keyRelease('A');
-        robot.keyRelease(KeyEvent.VK_SHIFT);
-    }
-
     /**
      * 解析字符串到KeyEvent的KeyCode
      *
