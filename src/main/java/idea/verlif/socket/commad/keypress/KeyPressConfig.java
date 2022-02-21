@@ -19,6 +19,11 @@ public class KeyPressConfig implements ConfigAdapter {
      */
     private long max = 20;
 
+    /**
+     * 单字模式开启关键词
+     */
+    private String lineLink = "LINE";
+
     @Override
     public String key() {
         return "keyPress";
@@ -42,5 +47,17 @@ public class KeyPressConfig implements ConfigAdapter {
         if (max > 0) {
             this.max = max;
         }
+    }
+
+    public String getLineLink() {
+        return lineLink;
+    }
+
+    public void setLineLink(String lineLink) {
+        this.lineLink = lineLink;
+    }
+
+    public boolean enableLineLink(String key) {
+        return key != null && key.equals(lineLink);
     }
 }

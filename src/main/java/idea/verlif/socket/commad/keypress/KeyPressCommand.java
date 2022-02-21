@@ -36,26 +36,189 @@ public class KeyPressCommand implements SocketCommand<KeyPressConfig> {
 
     @Override
     public void run(ClientHolder.ClientHandler clientHandler, String s) {
-        String[] sp = s.split(" ");
-        List<Integer> list = new ArrayList<>();
-        try {
-            for (int i = 0, size = (int) Math.min(sp.length, config.getMax()); i < size; i++) {
-                int code = parse(sp[i]);
-                if (code >= 0) {
-                    robot.keyPress(code);
-                    list.add(list.size(), code);
-                } else {
-                    clientHandler.sendMessage("Unknown input - " + sp[i] + ". Maybe you should use [space] to split it.");
-                    clientHandler.sendMessage("Key press is over");
-                    break;
+        String[] sp = s.split(" ", 2);
+        if (config.enableLineLink(sp[0].toUpperCase(Locale.ROOT))) {
+            if (sp.length == 2) {
+                sp = sp[1].split("");
+                for (String key : sp) {
+                    if (!keyAction(key)) {
+                        clientHandler.sendMessage("Unknown key - " + key);
+                        clientHandler.sendMessage("Key press is over");
+                        return;
+                    }
                 }
+            } else {
+                clientHandler.sendMessage("No key input!");
             }
-        } catch (Exception e) {
-            clientHandler.sendMessage("Something wrong! " + e.getMessage());
+        } else {
+            sp = s.split(" ");
+            List<Integer> list = new ArrayList<>();
+            try {
+                for (int i = 0, size = (int) Math.min(sp.length, config.getMax()); i < size; i++) {
+                    int code = parse(sp[i]);
+                    if (code >= 0) {
+                        robot.keyPress(code);
+                        list.add(list.size(), code);
+                    } else {
+                        clientHandler.sendMessage("Unknown input - " + sp[i] + ". Maybe you should use [space] to split it.");
+                        clientHandler.sendMessage("Key press is over");
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                clientHandler.sendMessage("Something wrong! " + e.getMessage());
+            }
+            for (Integer integer : list) {
+                robot.keyRelease(integer);
+            }
         }
-        for (Integer integer : list) {
-            robot.keyRelease(integer);
+    }
+
+    /**
+     * 单字输入模式
+     *
+     * @param s 单字的字符串
+     * @return 是否输入成功
+     */
+    private boolean keyAction(String s) {
+        int c = s.charAt(0);
+        if (c >= KeyEvent.VK_0 && c <= KeyEvent.VK_9) {
+            robot.keyPress(c);
+            robot.keyRelease(c);
+        } else if (c >= 'a' && c <= 'z') {
+            int r = c - 'a' + KeyEvent.VK_A;
+            robot.keyPress(r);
+            robot.keyRelease(r);
+        } else if (c >= KeyEvent.VK_A && c <= KeyEvent.VK_Z) {
+            robot.keyPress(KeyEvent.VK_SHIFT);
+            robot.keyPress(c);
+            robot.keyRelease(c);
+            robot.keyRelease(KeyEvent.VK_SHIFT);
+        } else {
+            int key;
+            boolean withShift = false;
+            switch (s) {
+                case " ":
+                    key = KeyEvent.VK_SPACE;
+                    break;
+                case "!":
+                    withShift = true;
+                    key = KeyEvent.VK_1;
+                    break;
+                case "@":
+                    withShift = true;
+                    key = KeyEvent.VK_2;
+                    break;
+                case "#":
+                    withShift = true;
+                    key = KeyEvent.VK_3;
+                    break;
+                case "$":
+                    withShift = true;
+                    key = KeyEvent.VK_4;
+                    break;
+                case "%":
+                    withShift = true;
+                    key = KeyEvent.VK_5;
+                    break;
+                case "^":
+                    withShift = true;
+                    key = KeyEvent.VK_6;
+                    break;
+                case "&":
+                    withShift = true;
+                    key = KeyEvent.VK_7;
+                    break;
+                case "*":
+                    withShift = true;
+                    key = KeyEvent.VK_8;
+                    break;
+                case "(":
+                    withShift = true;
+                    key = KeyEvent.VK_9;
+                    break;
+                case ")":
+                    withShift = true;
+                    key = KeyEvent.VK_0;
+                    break;
+                case "<":
+                    withShift = true;
+                case ",":
+                    key = KeyEvent.VK_COMMA;
+                    break;
+                case ">":
+                    withShift = true;
+                case ".":
+                    key = KeyEvent.VK_PERIOD;
+                    break;
+                case "?":
+                    withShift = true;
+                case "/":
+                    key = KeyEvent.VK_SLASH;
+                    break;
+                case ":":
+                    withShift = true;
+                case ";":
+                    key = KeyEvent.VK_SEMICOLON;
+                    break;
+                case "\"":
+                    withShift = true;
+                case "'":
+                    key = KeyEvent.VK_QUOTE;
+                    break;
+                case "{":
+                    withShift = true;
+                case "[":
+                    key = KeyEvent.VK_OPEN_BRACKET;
+                    break;
+                case "}":
+                    withShift = true;
+                case "]":
+                    key = KeyEvent.VK_CLOSE_BRACKET;
+                    break;
+                case "|":
+                    withShift = true;
+                case "\\":
+                    key = KeyEvent.VK_BACK_SLASH;
+                    break;
+                case "~":
+                    withShift = true;
+                case "`":
+                    key = KeyEvent.VK_BACK_QUOTE;
+                    break;
+                case "_":
+                    withShift = true;
+                case "-":
+                    key = KeyEvent.VK_SUBTRACT;
+                    break;
+                case "+":
+                    withShift = true;
+                case "=":
+                    key = KeyEvent.VK_EQUALS;
+                    break;
+                default:
+                    return false;
+            }
+            if (withShift) {
+                robot.keyPress(KeyEvent.VK_SHIFT);
+            }
+            robot.keyPress(key);
+            robot.keyRelease(key);
+            if (withShift) {
+                robot.keyRelease(KeyEvent.VK_SHIFT);
+            }
         }
+        return true;
+    }
+
+    public static void main(String[] args) throws AWTException {
+        Robot robot = new Robot();
+        robot.setAutoDelay(20);
+
+        robot.keyPress(KeyEvent.VK_SHIFT);
+        robot.keyPress('A');
+        robot.keyRelease('A');
+        robot.keyRelease(KeyEvent.VK_SHIFT);
     }
 
     /**
@@ -195,6 +358,7 @@ public class KeyPressCommand implements SocketCommand<KeyPressConfig> {
                 return KeyEvent.VK_CLOSE_BRACKET;
 
             // numpad numeric keys handled below
+            case "*":
             case "MULTIPLY":
                 return KeyEvent.VK_MULTIPLY;
             case "ADD":
